@@ -1,41 +1,85 @@
-# Created: Thursday Jul 23, 2026, 11:38 AM (UTC-6)
-# Last edited: Thursday Jul 23, 2026, 11:38 AM (UTC-6)
+# Created: Thursday Jul 23, 2026, 3:22 PM (UTC-6)
+# Last edited: Thursday Jul 23, 2026, 3:22 PM (UTC-6)
 
-"""Run repository — CRUD operations for runs and related data."""
+"""Run repository — CRUD operations for runs, published articles, and unresolved items."""
 
+import logging
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from content_pipeline.domain.client import UnresolvedItem, RunContext
-from content_pipeline.domain.enums import RunStatus, TopicPath
+from content_pipeline.domain.client import UnresolvedItem
 from content_pipeline.domain.run import Run
+from content_pipeline.domain.run_models import PublishedArticle
+from content_pipeline.exceptions import RunNotFoundError, RunCreationFailedError
 from content_pipeline.repositories.base_repository import BaseRepository
-from content_pipeline.repositories.exceptions import RunNotFoundError, UnresolvedItemNotFoundError
+
+logger = logging.getLogger(__name__)
 
 
 class RunRepository(BaseRepository):
-    """Repository for run data access."""
+    """Repository for run-related database operations."""
 
     async def create_run(
         self,
         client_id: UUID,
         folder_slug: str,
-        context: RunContext,
-        dry_run: bool = False,
+        context,  # RunContext
+        status: str = "initiated",
     ) -> Run:
-        """Create a new article run.
+        """Create a new run record.
 
         Args:
             client_id: Client UUID
-            folder_slug: Run folder slug (e.g., "Topic_Name_YYYY-MM")
-            context: RunContext domain object
-            dry_run: Whether this is a dry run
+            folder_slug: Run folder slug (e.g., "Topic_Name_2026-07")
+            context: RunContext object
+            status: Run status (default "initiated")
 
         Returns:
-            Created Run domain object
+            Run object with database-assigned id and timestamps
+
+        Raises:
+            RunCreationFailedError: If database operation fails
         """
-        raise NotImplementedError
+        logger.info(f"Creating run for client {client_id} with slug {folder_slug}")
+
+        try:
+            run_id = str(__import__("uuid").uuid4())
+            now = datetime.utcnow().isoformat()
+
+            data = {
+                "id": run_id,
+                "client_id": str(client_id),
+                "folder_slug": folder_slug,
+                "status": status,
+                "context": context.__dict__,  # Serialize RunContext
+                "current_stage": 0,
+                "created_at": now,
+                "updated_at": now,
+            }
+
+            response = self.supabase.table("runs").insert(data).execute()
+
+            if not response.data:
+                raise RuntimeError("Failed to insert run record")
+
+            logger.info(f"Run created: {run_id}")
+
+            # Return Run domain object
+            return Run(
+                id=UUID(run_id),
+                client_id=client_id,
+                folder_slug=folder_slug,
+                status=status,
+                context=context,
+                current_stage=0,
+                created_at=datetime.fromisoformat(now),
+                updated_at=datetime.fromisoformat(now),
+            )
+
+        except Exception as e:
+            logger.error(f"Failed to create run: {e}")
+            raise RunCreationFailedError(f"Failed to create run: {str(e)}") from e
 
     async def get_run(self, run_id: UUID) -> Run:
         """Retrieve a run by ID.
@@ -44,166 +88,199 @@ class RunRepository(BaseRepository):
             run_id: Run UUID
 
         Returns:
-            Run domain object
+            Run object
 
         Raises:
-            RunNotFoundError: Run not found
+            RunNotFoundError: If run not found
         """
-        raise NotImplementedError
+        logger.debug(f"Fetching run {run_id}")
 
-    async def get_run_by_slug(self, client_id: UUID, folder_slug: str) -> Run:
-        """Retrieve a run by client and folder slug.
+        try:
+            response = (
+                self.supabase.table("runs")
+                .select("*")
+                .eq("id", str(run_id))
+                .single()
+                .execute()
+            )
 
-        Args:
-            client_id: Client UUID
-            folder_slug: Run folder slug
+            if not response.data:
+                raise RunNotFoundError(f"Run {run_id} not found")
 
-        Returns:
-            Run domain object
+            data = response.data
+            return Run(
+                id=UUID(data["id"]),
+                client_id=UUID(data["client_id"]),
+                folder_slug=data["folder_slug"],
+                status=data["status"],
+                context=data["context"],  # TODO: deserialize to RunContext
+                current_stage=data["current_stage"],
+                created_at=datetime.fromisoformat(data["created_at"]),
+                updated_at=datetime.fromisoformat(data["updated_at"]),
+                human_review_flag=data.get("human_review_flag"),
+            )
 
-        Raises:
-            RunNotFoundError: Run not found
-        """
-        raise NotImplementedError
+        except Exception as e:
+            if isinstance(e, RunNotFoundError):
+                raise
+            logger.error(f"Failed to fetch run: {e}")
+            raise RunNotFoundError(f"Failed to fetch run {run_id}: {str(e)}") from e
 
-    async def update_run(self, run: Run) -> Run:
-        """Update an existing run.
-
-        Args:
-            run: Run domain object with updates
-
-        Returns:
-            Updated Run domain object
-
-        Raises:
-            RunNotFoundError: Run not found
-        """
-        raise NotImplementedError
-
-    async def update_run_status(self, run_id: UUID, status: RunStatus) -> Run:
-        """Update a run's status and updated_at timestamp.
-
-        Args:
-            run_id: Run UUID
-            status: New RunStatus
-
-        Returns:
-            Updated Run domain object
-
-        Raises:
-            RunNotFoundError: Run not found
-        """
-        raise NotImplementedError
-
-    async def advance_run_stage(self, run_id: UUID) -> Run:
-        """Advance a run to the next stage.
-
-        Args:
-            run_id: Run UUID
-
-        Returns:
-            Updated Run domain object
-
-        Raises:
-            RunNotFoundError: Run not found
-        """
-        raise NotImplementedError
-
-    async def list_runs_by_client(self, client_id: UUID) -> list[Run]:
-        """List all runs for a client.
+    async def get_published_articles(self, client_id: UUID) -> list[PublishedArticle]:
+        """Get all published articles for a client (for overlap check).
 
         Args:
             client_id: Client UUID
 
         Returns:
-            List of Run domain objects
-        """
-        raise NotImplementedError
+            List of PublishedArticle objects
 
-    async def add_unresolved_item(self, run_id: UUID, item: UnresolvedItem) -> UnresolvedItem:
-        """Add an unresolved item to a run.
+        Raises:
+            Exception: If database query fails
+        """
+        logger.debug(f"Fetching published articles for client {client_id}")
+
+        try:
+            response = (
+                self.supabase.table("published_articles")
+                .select("article_slug, markdown_content")
+                .eq("client_id", str(client_id))
+                .execute()
+            )
+
+            articles = []
+            for row in response.data or []:
+                # Extract title from markdown (first h1)
+                markdown = row.get("markdown_content", "")
+                lines = markdown.split("\n")
+                title = ""
+                for line in lines:
+                    if line.startswith("# "):
+                        title = line[2:].strip()
+                        break
+
+                articles.append(
+                    PublishedArticle(
+                        slug=row.get("article_slug", ""),
+                        title=title,
+                        primary_keyword="",  # TODO: Extract from metadata if stored
+                    )
+                )
+
+            logger.debug(f"Found {len(articles)} published articles for client {client_id}")
+            return articles
+
+        except Exception as e:
+            logger.error(f"Failed to fetch published articles: {e}")
+            return []
+
+    async def get_published_slugs(self, client_id: UUID) -> list[str]:
+        """Get list of published article slugs for overlap check.
+
+        Args:
+            client_id: Client UUID
+
+        Returns:
+            List of article slugs
+
+        Raises:
+            Exception: If database query fails
+        """
+        try:
+            response = (
+                self.supabase.table("published_articles")
+                .select("article_slug")
+                .eq("client_id", str(client_id))
+                .execute()
+            )
+
+            slugs = [row.get("article_slug", "") for row in response.data or []]
+            return slugs
+
+        except Exception as e:
+            logger.error(f"Failed to fetch published slugs: {e}")
+            return []
+
+    async def save_unresolved_item(
+        self, run_id: UUID, item: UnresolvedItem
+    ) -> UnresolvedItem:
+        """Save an unresolved item to database.
 
         Args:
             run_id: Run UUID
-            item: UnresolvedItem domain object
+            item: UnresolvedItem object
 
         Returns:
-            Created UnresolvedItem domain object
+            UnresolvedItem with database-assigned id
 
         Raises:
-            RunNotFoundError: Run not found
+            Exception: If database operation fails
         """
-        raise NotImplementedError
+        logger.info(f"Saving unresolved item to run {run_id}: {item.description}")
+
+        try:
+            item_id = str(__import__("uuid").uuid4())
+            now = datetime.utcnow().isoformat()
+
+            data = {
+                "id": item_id,
+                "run_id": str(run_id),
+                "description": item.description,
+                "blocks_run": item.blocks_run,
+                "source_stage": item.source_stage,
+                "resolved": item.resolved,
+                "resolved_at_stage": item.resolved_at_stage,
+                "created_at": now,
+            }
+
+            response = self.supabase.table("unresolved_items").insert(data).execute()
+
+            if not response.data:
+                raise RuntimeError("Failed to insert unresolved item")
+
+            return item
+
+        except Exception as e:
+            logger.error(f"Failed to save unresolved item: {e}")
+            raise RunCreationFailedError(f"Failed to save unresolved item: {str(e)}") from e
 
     async def get_unresolved_items(self, run_id: UUID) -> list[UnresolvedItem]:
-        """Retrieve all unresolved items for a run.
+        """Retrieve unresolved items for a run.
 
         Args:
             run_id: Run UUID
 
         Returns:
-            List of UnresolvedItem domain objects
+            List of UnresolvedItem objects
 
         Raises:
-            RunNotFoundError: Run not found
+            Exception: If database query fails
         """
-        raise NotImplementedError
+        logger.debug(f"Fetching unresolved items for run {run_id}")
 
-    async def mark_unresolved_item_resolved(
-        self, item_id: UUID, resolved_at_stage: int
-    ) -> UnresolvedItem:
-        """Mark an unresolved item as resolved.
+        try:
+            response = (
+                self.supabase.table("unresolved_items")
+                .select("*")
+                .eq("run_id", str(run_id))
+                .eq("resolved", False)
+                .execute()
+            )
 
-        Args:
-            item_id: UnresolvedItem UUID
-            resolved_at_stage: Stage at which resolution occurred
+            items = []
+            for row in response.data or []:
+                items.append(
+                    UnresolvedItem(
+                        description=row["description"],
+                        blocks_run=row["blocks_run"],
+                        source_stage=row["source_stage"],
+                        resolved=row["resolved"],
+                        resolved_at_stage=row.get("resolved_at_stage"),
+                    )
+                )
 
-        Returns:
-            Updated UnresolvedItem domain object
+            return items
 
-        Raises:
-            UnresolvedItemNotFoundError: Item not found
-        """
-        raise NotImplementedError
-
-    async def log_run_entry(self, run_id: UUID, entry: str) -> None:
-        """Log an entry to the run log.
-
-        Args:
-            run_id: Run UUID
-            entry: Log entry text
-        """
-        raise NotImplementedError
-
-    async def get_run_log_tail(self, run_id: UUID, limit: int = 20) -> list[dict]:
-        """Retrieve recent entries from the run log.
-
-        Args:
-            run_id: Run UUID
-            limit: Number of recent entries to retrieve
-
-        Returns:
-            List of log entry dicts with timestamp and text
-
-        Raises:
-            RunNotFoundError: Run not found
-        """
-        raise NotImplementedError
-
-    async def save_topic_recommendation(
-        self, client_id: UUID, topic: str, recommendation_text: str
-    ) -> dict:
-        """Save a topic recommendation from ideation.
-
-        Args:
-            client_id: Client UUID
-            topic: Recommended topic
-            recommendation_text: Recommendation details
-
-        Returns:
-            Saved recommendation dict
-
-        Raises:
-            ClientNotFoundError: Client not found (from domain)
-        """
-        raise NotImplementedError
+        except Exception as e:
+            logger.error(f"Failed to fetch unresolved items: {e}")
+            return []

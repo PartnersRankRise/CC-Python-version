@@ -11,7 +11,8 @@ from content_pipeline.parsing.editorial_note_parser import EditorialNoteParser
 from content_pipeline.parsing.seo_annotation_parser import SEOAnnotationParser
 from content_pipeline.parsing.qa_signoff_parser import QASignoffParser
 from content_pipeline.parsing.dossier_parser import DossierParser
-from content_pipeline.domain.enums import QADecision, QAIssueType
+from content_pipeline.parsing.handoff_parser import HandoffParser
+from content_pipeline.domain.enums import QADecision, QAIssueType, AuthorityMode
 
 
 @pytest.fixture
@@ -53,6 +54,20 @@ def dossier_content(reference_run_dir):
     """Load reference dossier from 01_Research_Dossier.md."""
     dossier_file = reference_run_dir / '01_Research_Dossier.md'
     return dossier_file.read_text()
+
+
+@pytest.fixture
+def handoff_stage1_content(reference_run_dir):
+    """Load Stage 1 handoff from 00_Stage_1_Handoff_Brief.md."""
+    handoff_file = reference_run_dir / '00_Stage_1_Handoff_Brief.md'
+    return handoff_file.read_text()
+
+
+@pytest.fixture
+def handoff_stage2_content(reference_run_dir):
+    """Load Stage 2 handoff from 01_Stage_2_Handoff.md."""
+    handoff_file = reference_run_dir / '01_Stage_2_Handoff.md'
+    return handoff_file.read_text()
 
 
 class TestBriefParser:
@@ -415,3 +430,50 @@ class TestDossierParser:
                              'audience_value_statement']:
             section_content = getattr(parsed, section_name)
             assert len(section_content) > 50, f"{section_name} is too short ({len(section_content)} chars)"
+
+
+class TestHandoffParser:
+    """Test HandoffParser against reference run."""
+
+    def test_handoff_parser_stage_1_handoff(self, handoff_stage1_content):
+        """Verify Stage 1 handoff parses correctly."""
+        parser = HandoffParser()
+        parsed = parser.parse(handoff_stage1_content)
+        
+        assert parsed.next_stage_number == 1, f"Expected stage 1, got {parsed.next_stage_number}"
+        assert parsed.next_stage_name.lower() == "research", f"Expected 'research', got {parsed.next_stage_name}"
+        assert parsed.carry_forward["topic"] != "", "topic is empty"
+        assert parsed.carry_forward["primary_keyword"] == "content marketing for home service businesses", \
+            f"Unexpected primary_keyword: {parsed.carry_forward['primary_keyword']}"
+        assert parsed.auto_run == False, f"Expected auto_run False, got {parsed.auto_run}"
+
+    def test_handoff_parser_authority_mode_normal(self, handoff_stage2_content):
+        """Verify Stage 2 handoff authority mode is NORMAL."""
+        parser = HandoffParser()
+        mode, fallback = parser.extract_authority_mode(handoff_stage2_content)
+        
+        # Reference run has no fallback
+        assert mode == AuthorityMode.NORMAL, f"Expected NORMAL mode, got {mode}"
+        assert fallback is None, f"Expected no fallback, got {fallback}"
+
+    def test_handoff_parser_metadata_extraction(self, handoff_stage1_content):
+        """Verify metadata fields are extracted."""
+        parser = HandoffParser()
+        parsed = parser.parse(handoff_stage1_content)
+        
+        assert parsed.status != "", "status is empty"
+        assert parsed.created_by != "", "created_by is empty"
+        assert parsed.created != "", "created is empty"
+        assert parsed.client == "Rankrise_Marketing", f"Expected Rankrise_Marketing, got {parsed.client}"
+        assert parsed.run != "", "run is empty"
+
+    def test_handoff_parser_carry_forward_fields(self, handoff_stage1_content):
+        """Verify carry_forward context fields are extracted."""
+        parser = HandoffParser()
+        parsed = parser.parse(handoff_stage1_content)
+        
+        # Check that carry_forward dict has expected keys
+        expected_keys = ["topic", "primary_keyword", "angle_notes", "priority_sources",
+                        "internal_links", "published_overlap", "unresolved_items"]
+        for key in expected_keys:
+            assert key in parsed.carry_forward, f"Missing carry_forward key: {key}"

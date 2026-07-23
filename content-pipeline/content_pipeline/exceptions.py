@@ -52,3 +52,18 @@ class MissingBrandColorError(ContentPipelineException):
 class ValidationError(ContentPipelineException):
     """Data validation failed."""
     pass
+
+
+class OverlapDetectedError(ContentPipelineException):
+    """Topic/keyword overlap detected with existing published content."""
+    pass
+
+
+class MissingReferenceFilesError(ContentPipelineException):
+    """One or more required reference files are missing."""
+    pass
+
+
+class RunCreationFailedError(ContentPipelineException):
+    """Run folder creation or database operation failed."""
+    pass

@@ -1,5 +1,5 @@
 # Created: Thursday Jul 23, 2026, 11:32 AM (UTC-6)
-# Last edited: Thursday Jul 23, 2026, 1:35 PM (UTC-6)
+# Last edited: Thursday Jul 23, 2026, 1:42 PM (UTC-6)
 
 """Stage domain models — pipeline execution outputs and QA results."""
 
@@ -9,6 +9,7 @@ from typing import Optional
 from uuid import UUID
 
 from content_pipeline.domain.enums import (
+    AuthorityMode,
     FallbackAuthorityType,
     QADecision,
     QAIssueType,
@@ -45,6 +46,22 @@ class ParsedDossier:
     search_intent: str
     audience_value_statement: str
     supplemental_notes: Optional[str] = None
+
+
+@dataclass
+class ParsedHandoff:
+    """Handoff document parsed into structured fields."""
+    status: str
+    created_by: str
+    created: str
+    client: str
+    run: str
+    next_stage_number: int
+    next_stage_name: str
+    expected_output: str
+    carry_forward: dict = field(default_factory=dict)
+    auto_run: bool = False
+    auto_run_reason: Optional[str] = None
 
 
 @dataclass

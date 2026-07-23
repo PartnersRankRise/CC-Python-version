@@ -372,6 +372,29 @@ CREATE TABLE provider_settings (
 -- Allows switching providers from the UI without restarting the server.
 
 -- ============================================================
+-- ASYNC JOBS (ARQ worker queue state + audit trail)
+-- ============================================================
+
+CREATE TABLE jobs (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  job_id            UUID NOT NULL UNIQUE,           -- Job ID from ARQ
+  status            TEXT NOT NULL DEFAULT 'queued'  -- "queued", "running", "complete", "failed"
+    CHECK (status IN ('queued', 'running', 'complete', 'failed')),
+  job_type          TEXT NOT NULL DEFAULT 'onboarding'  -- "onboarding", "stage_execution", etc.
+  progress          TEXT,                           -- "Step X/7", "Running validation", etc.
+  result            JSONB,                          -- Result data when complete
+  error_message     TEXT,                           -- Error when failed
+  context_data      JSONB DEFAULT '{}',             -- Arbitrary job context (client_id, run_id, etc.)
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  started_at        TIMESTAMPTZ,
+  completed_at      TIMESTAMPTZ,
+  updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_jobs_status ON jobs(status);
+CREATE INDEX idx_jobs_created ON jobs(created_at DESC);
+
+-- ============================================================
 -- INDEXES
 -- ============================================================
 
