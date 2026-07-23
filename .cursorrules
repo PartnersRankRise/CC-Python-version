@@ -1,0 +1,222 @@
+# Content Pipeline — Cursor Rules
+
+You are building a blog production pipeline application. A prompt-driven system already exists and is working. Your job is to faithfully replicate its logic in code — not redesign it.
+
+Read these rules before writing any code. They apply to every session, every file, every suggestion.
+
+---
+
+## What You Are Building
+
+A multi-client blog production pipeline. Articles move through sequential stages: Onboarding → Run Init → Research → Source Validation → Brief → Writing → Humanization → SEO → QA → Blog Formatting. Each stage has defined inputs, outputs, and quality gates. The application replaces a folder-of-markdown-files system with Python/FastAPI backend, Next.js frontend, and Supabase database.
+
+The existing prompt system (`BUILD_GUIDE.md`, `REFERENCE.md`, and the four architecture documents) is the source of truth. When in doubt, the behavior described in those documents wins over any assumption you might make.
+
+---
+
+## Tech Stack — No Deviations
+
+```
+Backend:        Python 3.12 + FastAPI (async throughout)
+Worker queue:   ARQ (not Celery — ARQ is natively async)
+LLM:            Anthropic API — claude-sonnet-4-6 (smart), claude-haiku-4-5-20251001 (fast)
+Research:       gpt-researcher library (pip install gpt-researcher)
+Database:       Supabase (Postgres) via supabase-py
+Frontend:       Next.js 14 (App Router)
+Styling:        Tailwind CSS for the application UI
+Output CSS:     blog_integration_base.css with token injection (DO NOT use Tailwind for blog HTML output)
+```
+
+If you want to suggest a different library or approach, say so explicitly and wait for human approval before writing code. Do not silently substitute.
+
+---
+
+## Project Structure — Follow Exactly
+
+```
+content_pipeline/          ← Python backend root
+├── domain/                ← Pure models, no I/O
+├── parsing/               ← Document parsers (build these before any service)
+├── services/              ← One class per pipeline stage
+├── orchestration/         ← Pipeline orchestrator, context assembler, trackers
+├── llm/                   ← LLM provider abstraction
+├── repositories/          ← All DB access
+├── config/                ← Authority model loader
+└── api/                   ← FastAPI routers
+
+frontend/                  ← Next.js root
+├── app/                   ← App Router pages
+├── components/            ← React components
+└── lib/                   ← API client, utilities
+
+supabase/
+└── migrations/            ← SQL migration files (schema from REFERENCE.md)
+```
+
+---
+
+## Rules That Are Never Negotiable
+
+### No Python Scripts from the Old System
+The system being replaced had Python scripts: `stage1_source_validator.py`, `word_count.py`, `merge_manual_html.py`. These are from a compromised system and must never be referenced, replicated, or imported. Their functionality is replaced by:
+- `stage1_source_validator.py` → `SourceValidationService` + gpt-researcher
+- `word_count.py` → `len(content.split())` inline in `FormattingService`
+- `merge_manual_html.py` → API endpoint `POST /runs/{run_id}/stages/7/manual-upload`
+
+### The Parsing Layer Comes First
+Do not write any stage service until all six parsers exist and pass their tests:
+- `BriefParser` — strips `<!--BRIEF: ... -->` tokens; preserves tables between tokens
+- `DossierParser` — extracts 8 formal sections + `supplemental_notes`
+- `HandoffParser` — extracts structured fields from handoff documents
+- `SEOAnnotationParser` — splits article body from `## SEO Annotation Sheet`
+- `EditorialNoteParser` — splits article body from `## Editorial Note`
+- `QASignoffParser` — parses scored signoff into `QAResult` domain object
+
+### Token Leakage Is a Hard Stop
+These strings must never appear in Stage 3, 4, 5, 6, or 7 outputs:
+- `<!--BRIEF:`
+- `BEGIN_BLOG_REQUEST`
+- `END_BLOG_REQUEST`
+- `## Editorial Note`
+- `## SEO Annotation Sheet`
+
+If you write code that passes content between stages, always verify these are absent.
+
+### Content Is Never Mixed with Appended Sections
+- `stage_outputs.article_content` = reader-facing article only
+- `stage_outputs.editorial_note` = Stage 4 editorial note only (never in article_content)
+- `stage_outputs.seo_annotation` = Stage 5 annotation sheet only (never in article_content)
+- `stage_outputs.qa_result` = Stage 6 QA signoff only
+
+Never store these in the same field. Never pass appended sections downstream.
+
+### CSS Token Format Is Exact
+`PRIMARY_RGB` and `ACCENT_RGB` brand color values are `"r, g, b"` strings — no `#` prefix. They are used inside `rgba()` in the CSS. A `#` prefix breaks the CSS. Always validate this.
+
+### QA Issues Have Three Types
+```python
+class QAIssueType(Enum):
+    PIPELINE_FAILURE = "pipeline_failure"    # re-run a stage
+    CLIENT_DECISION = "client_decision"      # human action outside pipeline
+    MINOR_OBSERVATION = "minor_observation"  # informational
+```
+Never route `client_decision` issues to a revision stage.
+
+### Source Validation Short-Circuits for home_services
+`min_valid_sources_required = 0` means immediately return `APPROVED`. Do not run any HTTP validation or retry loop. This is intentional — home services content is field-expertise-led.
+
+### Word Count Is Stored as Structured JSONB, Never a String
+```python
+{"count": 2776, "target_min": 2200, "target_max": 2800, "status": "within_target"}
+```
+Not `"2776 words | target: 2200-2800 | WITHIN TARGET"`.
+
+### Revision Routing Goes to Earliest Responsible Stage
+When QA fails, route to the earliest stage that can fix it — never automatically back to Stage 1.
+| Failure | Route to |
+|---|---|
+| factual_claim, ymyl, cta_missing, eeat | Stage 3 |
+| ai_sounding, voice_inconsistency | Stage 4 |
+| keyword_placement, meta_title, header_hierarchy | Stage 5 |
+
+---
+
+## Code Style
+
+```python
+# Python
+- Type hints on all function signatures
+- Dataclasses for domain models (no Pydantic in domain layer)
+- Pydantic models in API layer only
+- async/await throughout — no synchronous LLM calls
+- Explicit error types: MissingPrerequisiteError, StageBlockedError, InternalTokenLeakError, etc.
+- No bare except clauses
+- Repository pattern: all DB access through repository classes, never in service or stage classes
+```
+
+```typescript
+// TypeScript/Next.js
+- Server components for data-fetching pages (client list, run detail, stage output views)
+- Client components only for interactive/streaming elements
+- Fetch via typed API client in /lib/api.ts
+- SSE via EventSource for stage streaming
+- No direct Supabase calls from the frontend — go through the FastAPI backend
+```
+
+---
+
+## When You Are Unsure
+
+1. Check `BUILD_GUIDE.md` first — stage-by-stage implementation notes
+2. Check `REFERENCE.md` — schema, enums, API contracts, domain models
+3. Check the architecture addendum documents for deeper context
+4. Ask the human before proceeding if the answer isn't in those documents
+
+Do not guess at stage behavior. The original system is precisely documented and the application must match it exactly.
+
+---
+
+## The Reference Run
+
+A complete production run exists in the project files under `reference_run/`. When testing parsers, stage outputs, or QA logic, use these files as ground truth:
+
+- `01_Research_Dossier.md` → 8 sections + `RESEARCH NOTES FOR STAGE 2` informal trailing section
+- `02_Content_Brief.md` → contains `<!--BRIEF:` tokens AND content types table between tokens
+- `03_First_Draft.md` → opens with 3-line `Target Keyword / Title Tag / Meta Description` header
+- `04_Humanized_Draft.md` → article body + `## Editorial Note` (5 sub-sections)
+- `05_SEO_Draft.md` → article body + `## SEO Annotation Sheet` (word count: 2776 | 2200-2800 | WITHIN TARGET)
+- `06_QA_Signoff.md` → 38/39 PASS, AI Risk 5/15, Section F FLAG (client_decision type)
+- `06_QA_Approved_Draft.md` → SEO draft body only; no annotation sheet
+- `07_Blog_Final.html` → 784 lines; 11 CSS tokens resolved; zero internal tokens
+- All handoff files → structured fields per `REFERENCE.md` handoff format
+
+When a parser or stage produces output, compare it to the corresponding reference file.
+
+---
+
+## LLM Provider System
+
+Four providers are supported. All implement the same LLMProvider interface. Stage services never import individual provider classes — always use LLMProviderFactory.
+
+```
+LLM_PROVIDER=anthropic    → AnthropicProvider (default)
+LLM_PROVIDER=openrouter   → OpenRouterProvider (requires langchain-openrouter)
+LLM_PROVIDER=ollama       → OllamaProvider (requires langchain-ollama + Ollama running)
+LLM_PROVIDER=lm_studio    → LMStudioProvider (requires LM Studio server running)
+```
+
+Model selection: `PIPELINE_SMART_MODEL` (writing, QA) and `PIPELINE_FAST_MODEL` (brief, SEO, onboarding).
+
+**gpt-researcher uses its own separate config.** Its `SMART_LLM`, `FAST_LLM`, `STRATEGIC_LLM` env vars are independent of `LLM_PROVIDER`. The two systems can use completely different providers simultaneously.
+
+**Critical: OpenRouter has no embedding support.** When `FAST_LLM=openrouter:...`, set `EMBEDDING=google_genai:models/text-embedding-004` (free Google tier) as the embedding provider.
+
+**LM Studio uses the `openai:` gpt-researcher prefix.** LM Studio is OpenAI-compatible. Set `OPENAI_BASE_URL=http://localhost:1234/v1` and use `FAST_LLM=openai:your-model-name`.
+
+**Local models produce lower-quality output.** Quality gate thresholds auto-adjust via `PROVIDER_QUALITY_TOLERANCES` in `config/provider_config.py`. Expect more validation retries with Ollama and LM Studio.
+
+**New providers go in `content_pipeline/llm/`.** Add to `LLMProviderFactory._create()`. Never add provider selection logic anywhere else.
+
+---
+
+## Output and Artifact Discipline
+
+Do NOT create summary, status, or "next steps" markdown files in the project root or any directory unless explicitly asked. This includes files named:
+- SCAFFOLD_COMPLETE.md
+- NEXT_STEPS.md
+- STRUCTURE.txt
+- STEP_COMPLETE.md
+- STATUS.md
+- SUMMARY.md
+- or any variant
+
+After completing a step, report the result directly in chat. The only files you create on disk are application code, tests, migrations, and configuration — exactly what is described in the current step prompt. Nothing else.
+
+The single exception: if a step prompt explicitly asks you to create a document file, create it in the location specified by the prompt, not the root.
+
+## Git Hygiene
+
+Never commit these to git:
+- *.md files in the project root that are not README.md
+- SCAFFOLD_COMPLETE.md, NEXT_STEPS.md, STRUCTURE.txt, or similar Cursor narration files
+- .env (only .env.example is committed)

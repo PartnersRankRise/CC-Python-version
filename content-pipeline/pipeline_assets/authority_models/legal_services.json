@@ -1,0 +1,108 @@
+{
+  "industry": "legal_services",
+  "name": "Legal Services & Law Firms",
+  "description": "Legal practice, law firms, and legal education. Requires at least 3 verified legal sources to proceed. Heavily restricted fallback mode.",
+  
+  "validation": {
+    "max_retry_attempts": 6,
+    "min_valid_sources_required": 3,
+    "retry_strategies": [
+      "primary_legal_sources",
+      "case_law_databases",
+      "bar_association_publications",
+      "law_review_articles",
+      "government_statutes",
+      "legal_textbooks"
+    ],
+    "strategy_descriptions": {
+      "primary_legal_sources": "Court databases, official legal repositories",
+      "case_law_databases": "Google Scholar, LexisNexis, Westlaw, other case law",
+      "bar_association_publications": "State bar associations, ABA publications",
+      "law_review_articles": "Law school law reviews and legal journals",
+      "government_statutes": "Official government statutes and regulations",
+      "legal_textbooks": "Published legal textbooks and educational materials"
+    },
+    "relevance_keywords": [
+      "statute", "regulation", "court", "case", "law", "legal", "attorney",
+      "liability", "compliance", "precedent", "plaintiff", "defendant",
+      "contract", "claim", "damages", "jurisdiction"
+    ],
+    "claim_types": {
+      "legal_process": "Procedural explanations or filing requirements",
+      "risk_assessment": "Likelihood or consequence framing",
+      "statutory_framework": "General references to applicable law",
+      "case_precedent": "Patterns from prior cases",
+      "statistics": "Reported legal outcomes or filing rates"
+    },
+    "replacement_source_strategies": {
+      "order": [
+        "government_statutes",
+        "primary_legal_sources",
+        "case_law_databases",
+        "bar_association_publications"
+      ],
+      "notes": "Prefer official statutes and court repositories over commentary"
+    }
+  },
+  
+  "fallback_authority": {
+    "primary": "ATTORNEY_EXPERTISE",
+    "secondary": [
+      "CASE_PRECEDENT",
+      "STATUTORY_FRAMEWORK"
+    ],
+    "allowed_claims": [
+      "legal_process_explanation",
+      "common_scenarios",
+      "risk_assessment",
+      "strategic_considerations",
+      "attorney_perspective"
+    ],
+    "disallowed_claims": [
+      "specific_precedent_without_citation",
+      "legal_advice_for_specific_case",
+      "guaranteed_outcomes",
+      "statutory_interpretation",
+      "regulatory_compliance"
+    ],
+    "authority_descriptions": {
+      "ATTORNEY_EXPERTISE": "Direct legal practice experience and professional judgment",
+      "CASE_PRECEDENT": "Patterns observed across similar cases",
+      "STATUTORY_FRAMEWORK": "General understanding of applicable law"
+    }
+  },
+  
+  "claim_repositioning": {
+    "description": "Reframe legal claims as attorney perspective rather than authoritative legal statements",
+    "replacements": [
+      {
+        "old": "Legal precedent establishes...",
+        "new": "In our experience with similar cases...",
+        "context": "For precedent-based claims"
+      },
+      {
+        "old": "The statute requires...",
+        "new": "Generally, the law addresses...",
+        "context": "For statutory interpretation"
+      },
+      {
+        "old": "[COURT] decided that...",
+        "new": "Courts have generally found...",
+        "context": "For specific case citations"
+      },
+      {
+        "old": "This guarantees...",
+        "new": "This typically results in...",
+        "context": "Avoid absolute guarantees"
+      }
+    ],
+    "authority_phrase": "Based on [X] years of legal practice",
+    "authority_phrase_examples": [
+      "Drawing on our firm's 25 years of experience",
+      "From our perspective as practicing attorneys",
+      "Based on patterns we've observed in practice"
+    ]
+  },
+  
+  "notes": "Legal content carries significant liability. Fallback mode is restricted—only general legal process can be explained under attorney authority. Specific legal advice requires sources. Consider requiring 5 sources for high-liability practice areas."
+}

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "content-pipeline"
+version = "0.1.0"
+description = "Multi-client blog production pipeline"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.111",
+    "uvicorn[standard]>=0.29",
+    "supabase>=2.4",
+    "anthropic>=0.28",
+    "gpt-researcher>=0.10",
+    "arq>=0.25",
+    "pydantic>=2.7",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.21",
+    "black>=23.12",
+    "ruff>=0.1",
+]
+
+[tool.setuptools]
+packages = ["content_pipeline"]

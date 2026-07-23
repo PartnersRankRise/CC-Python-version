@@ -1,0 +1,108 @@
+{
+  "industry": "home_services",
+  "name": "Home Services (Plumbing, Roofing, HVAC, General Contracting)",
+  "description": "Home repair and maintenance services. Min sources can be zero—expert content is primary authority. Trade standards are acceptable sources.",
+  
+  "validation": {
+    "max_retry_attempts": 6,
+    "min_valid_sources_required": 0,
+    "retry_strategies": [
+      "trade_associations",
+      "manufacturer_specifications",
+      "building_codes",
+      "industry_forums",
+      "textbooks_trade",
+      "government_building_databases"
+    ],
+    "strategy_descriptions": {
+      "trade_associations": "Plumbing, roofing, HVAC professional associations",
+      "manufacturer_specifications": "Equipment and material manufacturer documentation",
+      "building_codes": "IPC, IRC, local building codes and standards",
+      "industry_forums": "Professional trade forums and discussion boards",
+      "textbooks_trade": "Trade school textbooks and certification materials",
+      "government_building_databases": "Government building and construction standards"
+    },
+    "relevance_keywords": [
+      "roof", "roofing", "hvac", "plumbing", "installation", "contractor",
+      "ventilation", "shingle", "insulation", "maintenance", "repair",
+      "building", "code", "warranty", "durability", "weather", "hail", "wind"
+    ],
+    "claim_types": {
+      "installation_procedures": "How systems should be installed or serviced",
+      "material_properties": "Performance or lifespan characteristics of materials",
+      "building_codes": "Code compliance or regulatory requirements",
+      "troubleshooting": "Diagnostic or repair guidance",
+      "statistics": "Measured performance, lifespan, or failure rates"
+    },
+    "replacement_source_strategies": {
+      "order": [
+        "building_codes",
+        "manufacturer_specifications",
+        "trade_associations",
+        "government_building_databases"
+      ],
+      "notes": "Prefer code bodies and manufacturer documentation for technical claims"
+    }
+  },
+  
+  "fallback_authority": {
+    "primary": "FIELD_EXPERTISE",
+    "secondary": [
+      "MANUFACTURER_DATA",
+      "BUILDING_CODES"
+    ],
+    "allowed_claims": [
+      "installation_procedures",
+      "material_properties",
+      "cost_factors",
+      "troubleshooting",
+      "maintenance_schedules",
+      "equipment_selection"
+    ],
+    "disallowed_claims": [
+      "health_claims_without_source",
+      "compliance_without_code_reference",
+      "energy_savings_percentages",
+      "regulatory_requirements"
+    ],
+    "authority_descriptions": {
+      "FIELD_EXPERTISE": "Hands-on experience from licensed contractors and tradespeople",
+      "MANUFACTURER_DATA": "Equipment manufacturer specifications and guidelines",
+      "BUILDING_CODES": "Standard industry codes and regulations"
+    }
+  },
+  
+  "claim_repositioning": {
+    "description": "Reframe technical claims as field expertise",
+    "replacements": [
+      {
+        "old": "Industry standards require...",
+        "new": "In our experience, best practice is...",
+        "context": "For standard-based claims"
+      },
+      {
+        "old": "Research shows...",
+        "new": "We've found that...",
+        "context": "For general claims"
+      },
+      {
+        "old": "Studies indicate...",
+        "new": "Through years of installations...",
+        "context": "For data-based claims"
+      },
+      {
+        "old": "[EQUIPMENT] reduces costs by [X]%",
+        "new": "[EQUIPMENT] typically reduces costs",
+        "context": "Avoid specific percentages without source"
+      }
+    ],
+    "authority_phrase": "Based on [X] years of professional installation and service",
+    "authority_phrase_examples": [
+      "Drawing on our team's 40+ years combined experience",
+      "From thousands of installations we've completed",
+      "Based on daily work in the field"
+    ]
+  },
+  
+  "notes": "Home services content is highly practical. min_valid_sources_required is zero because field expertise is the primary authority. External sources are nice-to-have but not required. Always reference building codes when applicable."
+}

@@ -1,0 +1,108 @@
+{
+  "industry": "software_development",
+  "name": "Software Development & Technology",
+  "description": "Software development, programming, DevOps, technical architecture. Min 1 source acceptable. Developer experience is highly valued authority.",
+  
+  "validation": {
+    "max_retry_attempts": 6,
+    "min_valid_sources_required": 1,
+    "retry_strategies": [
+      "official_documentation",
+      "peer_reviewed_technical",
+      "established_tech_publications",
+      "framework_maintainers",
+      "industry_best_practices",
+      "technical_community"
+    ],
+    "strategy_descriptions": {
+      "official_documentation": "Official docs from frameworks, languages, platforms",
+      "peer_reviewed_technical": "IEEE, ACM, academic computer science publications",
+      "established_tech_publications": "TechCrunch, The Verge, established tech blogs",
+      "framework_maintainers": "GitHub repos, official framework blogs",
+      "industry_best_practices": "Industry standards, RFCs, technical standards bodies",
+      "technical_community": "Stack Overflow, GitHub discussions, technical forums"
+    },
+    "relevance_keywords": [
+      "api", "software", "development", "framework", "library", "deployment",
+      "security", "performance", "architecture", "database", "cloud", "devops",
+      "testing", "code", "programming", "runtime", "version"
+    ],
+    "claim_types": {
+      "implementation": "How to build, configure, or deploy something",
+      "performance": "Speed, scalability, or resource usage claims",
+      "security": "Vulnerability, hardening, or compliance claims",
+      "comparison": "Technology or tool comparisons",
+      "statistics": "Benchmarks or measured outcomes"
+    },
+    "replacement_source_strategies": {
+      "order": [
+        "official_documentation",
+        "industry_best_practices",
+        "peer_reviewed_technical",
+        "framework_maintainers"
+      ],
+      "notes": "Prefer official docs and standards bodies over blog commentary"
+    }
+  },
+  
+  "fallback_authority": {
+    "primary": "DEVELOPER_EXPERTISE",
+    "secondary": [
+      "OPEN_SOURCE_COMMUNITY",
+      "INDUSTRY_STANDARDS"
+    ],
+    "allowed_claims": [
+      "implementation_patterns",
+      "performance_considerations",
+      "code_organization",
+      "debugging_approaches",
+      "best_practices",
+      "technology_comparisons"
+    ],
+    "disallowed_claims": [
+      "security_vulnerabilities_without_proof",
+      "specific_performance_metrics",
+      "compliance_certifications",
+      "licensing_requirements"
+    ],
+    "authority_descriptions": {
+      "DEVELOPER_EXPERTISE": "Direct development experience and hands-on knowledge",
+      "OPEN_SOURCE_COMMUNITY": "Community consensus and open source contributions",
+      "INDUSTRY_STANDARDS": "Accepted technical standards and best practices"
+    }
+  },
+  
+  "claim_repositioning": {
+    "description": "Reframe technical claims as developer experience and pragmatic observation",
+    "replacements": [
+      {
+        "old": "Research shows...",
+        "new": "We've found in practice...",
+        "context": "For technical research"
+      },
+      {
+        "old": "Studies indicate...",
+        "new": "Experience shows...",
+        "context": "For technical data"
+      },
+      {
+        "old": "[FRAMEWORK] reduces development time by [X]%",
+        "new": "[FRAMEWORK] typically accelerates development",
+        "context": "For performance claims"
+      },
+      {
+        "old": "According to [ORG]...",
+        "new": "In the developer community...",
+        "context": "For organizational citations"
+      }
+    ],
+    "authority_phrase": "Based on [X] years of software development experience",
+    "authority_phrase_examples": [
+      "Drawing on our team's combined 100+ years of coding",
+      "From thousands of lines of code we've written",
+      "Based on production systems we've built and maintained"
+    ]
+  },
+  
+  "notes": "Software/tech content thrives on developer expertise and open source community perspective. Official documentation is the gold standard source. Security claims require proof—don't claim vulnerabilities without CVE or proof-of-concept."
+}

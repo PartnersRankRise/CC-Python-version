@@ -1,0 +1,93 @@
+{
+  "industry": "INDUSTRY_KEY",
+  "name": "Human Readable Industry Name",
+  "description": "Brief description of what this industry covers and its source validation requirements",
+  
+  "validation": {
+    "max_retry_attempts": 6,
+    "min_valid_sources_required": 1,
+    "retry_strategies": [
+      "peer_reviewed_academic",
+      "professional_associations",
+      "industry_reports",
+      "government_databases",
+      "textbooks_continuing_education",
+      "grey_literature_whitepapers"
+    ],
+    "strategy_descriptions": {
+      "peer_reviewed_academic": "Peer-reviewed journal articles and academic papers from established publishers",
+      "professional_associations": "Publications and guidelines from professional organizations and certification bodies",
+      "industry_reports": "Industry trend reports, market analysis, and best practice guides",
+      "government_databases": "Government publications, databases, and regulatory resources",
+      "textbooks_continuing_education": "Textbooks, manuals, and certified continuing education materials",
+      "grey_literature_whitepapers": "White papers, technical reports, and organizational publications not in mainstream databases"
+    },
+    "relevance_keywords": [],
+    "claim_types": {
+      "statistics": "Numeric claims, percentages, or measured outcomes",
+      "regulatory": "Rules, compliance requirements, or legal standards",
+      "process": "Step-by-step procedures or operational guidance",
+      "comparison": "Comparative claims between methods, products, or approaches"
+    },
+    "replacement_source_strategies": {
+      "order": [
+        "government_databases",
+        "peer_reviewed_academic",
+        "professional_associations",
+        "industry_reports"
+      ],
+      "notes": "Prefer primary institutional sources before secondary commentary"
+    }
+  },
+  
+  "fallback_authority": {
+    "primary": "AUTHORITY_TYPE",
+    "secondary": [
+      "AUTHORITY_TYPE_2"
+    ],
+    "allowed_claims": [
+      "claim_type_1",
+      "claim_type_2"
+    ],
+    "disallowed_claims": [
+      "claim_type_that_requires_sources"
+    ],
+    "authority_descriptions": {
+      "AUTHORITY_TYPE": "What this authority type means for this industry"
+    }
+  },
+  
+  "claim_repositioning": {
+    "description": "How to reframe research-backed claims as expert-backed claims",
+    "replacements": [
+      {
+        "old": "Research shows that...",
+        "new": "Our experts observe that...",
+        "context": "For general research claims"
+      },
+      {
+        "old": "Studies indicate...",
+        "new": "In our experience...",
+        "context": "For claims based on studies or data"
+      },
+      {
+        "old": "[PERCENTAGE]% of [GROUP]...",
+        "new": "Most [GROUP] we work with...",
+        "context": "For specific statistics without source"
+      },
+      {
+        "old": "According to [ORGANIZATION]...",
+        "new": "Industry best practices recognize...",
+        "context": "For claims citing organizations we can't verify"
+      }
+    ],
+    "authority_phrase": "Based on [X] years of professional experience",
+    "authority_phrase_examples": [
+      "Based on 15 years of practice",
+      "Drawing on our extensive client work",
+      "From our hands-on expertise"
+    ]
+  },
+  
+  "notes": "Customize each field for your specific industry. The retry_strategies array defines the order of search attempts when initial sources fail. The allowed_claims and disallowed_claims help Stage 2 understand what can be said under expert authority vs. what requires external sources."
+}

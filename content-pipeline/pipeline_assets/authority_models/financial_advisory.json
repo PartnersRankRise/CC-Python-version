@@ -1,0 +1,107 @@
+{
+  "industry": "financial_advisory",
+  "name": "Financial Advisory & Insurance",
+  "description": "Financial planning, investment advice, insurance guidance. Requires 2 verified regulatory or institutional sources. Highly restricted fallback.",
+  
+  "validation": {
+    "max_retry_attempts": 6,
+    "min_valid_sources_required": 2,
+    "retry_strategies": [
+      "regulatory_sources",
+      "financial_institutions",
+      "certified_advisor_associations",
+      "government_financial_databases",
+      "industry_research",
+      "textbooks_finance"
+    ],
+    "strategy_descriptions": {
+      "regulatory_sources": "SEC, FINRA, CFPB, and regulatory body publications",
+      "financial_institutions": "Federal Reserve, central banks, major financial institutions",
+      "certified_advisor_associations": "CFP Board, NAPFA, CFA Institute publications",
+      "government_financial_databases": "Treasury, IRS, government financial resources",
+      "industry_research": "Financial industry research and trend reports",
+      "textbooks_finance": "Financial textbooks and certified education materials"
+    },
+    "relevance_keywords": [
+      "investment", "retirement", "portfolio", "insurance", "tax", "regulation",
+      "sec", "finra", "cfpb", "interest", "rate", "risk", "savings", "planning",
+      "advisor", "fiduciary", "compliance", "market"
+    ],
+    "claim_types": {
+      "regulatory": "Rules from SEC, FINRA, CFPB, or similar bodies",
+      "planning_process": "General financial planning steps",
+      "risk_framing": "Risk/return or suitability discussion",
+      "statistics": "Rates, returns, or market data",
+      "comparison": "Product or strategy comparisons"
+    },
+    "replacement_source_strategies": {
+      "order": [
+        "regulatory_sources",
+        "government_financial_databases",
+        "financial_institutions",
+        "certified_advisor_associations"
+      ],
+      "notes": "Prefer regulator and government sources for compliance-related claims"
+    }
+  },
+  
+  "fallback_authority": {
+    "primary": "ADVISOR_EXPERTISE",
+    "secondary": [
+      "REGULATORY_FRAMEWORK",
+      "INDUSTRY_STANDARDS"
+    ],
+    "allowed_claims": [
+      "planning_process_overview",
+      "general_financial_concepts",
+      "question_framework",
+      "advisor_perspective"
+    ],
+    "disallowed_claims": [
+      "specific_investment_recommendations",
+      "rate_or_return_projections",
+      "regulatory_interpretation",
+      "compliance_requirements",
+      "tax_advice"
+    ],
+    "authority_descriptions": {
+      "ADVISOR_EXPERTISE": "Professional financial advisor experience and perspective",
+      "REGULATORY_FRAMEWORK": "General knowledge of applicable regulations",
+      "INDUSTRY_STANDARDS": "Accepted best practices in financial advisory"
+    }
+  },
+  
+  "claim_repositioning": {
+    "description": "Reframe financial claims as general advisor guidance, not specific advice",
+    "replacements": [
+      {
+        "old": "The SEC requires...",
+        "new": "Generally, regulatory requirements include...",
+        "context": "For regulatory claims"
+      },
+      {
+        "old": "Historical data shows [X]% returns...",
+        "new": "Markets have historically shown variability...",
+        "context": "Avoid specific return projections"
+      },
+      {
+        "old": "Studies indicate that...",
+        "new": "Many advisors recommend...",
+        "context": "For research-based claims"
+      },
+      {
+        "old": "You should...",
+        "new": "Many clients find it helpful to...",
+        "context": "Avoid direct recommendations"
+      }
+    ],
+    "authority_phrase": "Based on [X] years of financial advisory experience",
+    "authority_phrase_examples": [
+      "In our practice advising hundreds of clients",
+      "Drawing on our team's combined experience",
+      "Based on conversations with clients in this situation"
+    ]
+  },
+  
+  "notes": "Financial advice carries significant legal/liability concerns. Fallback mode is restricted to general concepts only. Specific investment advice, returns projections, and regulatory interpretation MUST have sources. Consider requiring 3-4 sources for investment-focused content."
+}

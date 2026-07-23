@@ -1,0 +1,4 @@
+# Created: Thursday Jul 23, 2026, 11:13 AM (UTC-6)
+# Last edited: Thursday Jul 23, 2026, 11:13 AM (UTC-6)
+
+"""Stage 1.5 — Source validation service using gpt-researcher SourceCurator."""

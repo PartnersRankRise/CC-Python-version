@@ -1,0 +1,107 @@
+{
+  "industry": "health_wellness_spa",
+  "name": "Health, Wellness & Spa Services",
+  "description": "Wellness services including massage therapy, spa treatments, hydrotherapy, fitness coaching, and other therapeutic modalities. Requires at least one verified wellness-focused source.",
+  
+  "validation": {
+    "max_retry_attempts": 6,
+    "min_valid_sources_required": 1,
+    "retry_strategies": [
+      "peer_reviewed_medical",
+      "professional_associations_massage_therapy",
+      "wellness_institutes",
+      "government_health_databases",
+      "textbooks_continuing_education",
+      "grey_literature_clinical_reports"
+    ],
+    "strategy_descriptions": {
+      "peer_reviewed_medical": "Peer-reviewed articles from medical and wellness journals",
+      "professional_associations_massage_therapy": "AMTA, NBCTMB, and other massage therapy professional organizations",
+      "wellness_institutes": "Global Wellness Institute, spa industry associations",
+      "government_health_databases": "NIH, CDC, FDA, and government health resources",
+      "textbooks_continuing_education": "Massage therapy textbooks and certified continuing education",
+      "grey_literature_clinical_reports": "Clinic reports, spa studies, wellness center publications"
+    },
+    "relevance_keywords": [
+      "wellness", "spa", "massage", "therapy", "hydrotherapy", "relaxation",
+      "stress", "muscle", "circulation", "tension", "recovery", "self-care",
+      "treatment", "therapeutic", "client", "practitioner"
+    ],
+    "claim_types": {
+      "client_outcomes": "Reported client results or satisfaction patterns",
+      "mechanism_of_action": "How a treatment affects the body or mind",
+      "safety_protocols": "Hygiene, contraindications, or safety guidance",
+      "comparison": "Comparisons between modalities or alternatives",
+      "statistics": "Percentages, averages, or measured outcomes"
+    },
+    "replacement_source_strategies": {
+      "order": [
+        "government_health_databases",
+        "peer_reviewed_medical",
+        "professional_associations_massage_therapy",
+        "wellness_institutes"
+      ],
+      "notes": "Prefer NIH/CDC and peer-reviewed wellness research for health-related claims"
+    }
+  },
+  
+  "fallback_authority": {
+    "primary": "PRACTITIONER_EXPERTISE",
+    "secondary": [
+      "CLIENT_OBSERVATION",
+      "INDUSTRY_STANDARDS"
+    ],
+    "allowed_claims": [
+      "client_outcomes",
+      "mechanism_of_action",
+      "comparison_to_alternatives",
+      "safety_protocols",
+      "therapist_observations"
+    ],
+    "disallowed_claims": [
+      "specific_percentages_without_source",
+      "disease_treatment_claims",
+      "medical_efficacy_claims",
+      "pharmaceutical_comparisons"
+    ],
+    "authority_descriptions": {
+      "PRACTITIONER_EXPERTISE": "Direct experience from massage therapists and wellness practitioners",
+      "CLIENT_OBSERVATION": "Observations from client feedback and case experience",
+      "INDUSTRY_STANDARDS": "Accepted best practices in the wellness industry"
+    }
+  },
+  
+  "claim_repositioning": {
+    "description": "Reframe research-backed claims as experience-backed claims for practitioners",
+    "replacements": [
+      {
+        "old": "Research shows that...",
+        "new": "Our therapists observe that...",
+        "context": "For general research claims"
+      },
+      {
+        "old": "Studies indicate...",
+        "new": "In our practice, we've found that...",
+        "context": "For claims based on studies"
+      },
+      {
+        "old": "[PERCENTAGE]% improvement...",
+        "new": "Clients frequently report...",
+        "context": "For specific statistics"
+      },
+      {
+        "old": "According to [WELLNESS_ORG]...",
+        "new": "Industry best practices recognize...",
+        "context": "For organizational citations"
+      }
+    ],
+    "authority_phrase": "Based on direct work with hundreds of clients",
+    "authority_phrase_examples": [
+      "Based on our experience with 500+ clients",
+      "Drawing on our therapists' collective expertise",
+      "From thousands of sessions we've facilitated"
+    ]
+  },
+  
+  "notes": "Health/wellness content must avoid medical claims that require peer-reviewed sources. When sources fail, repositioning under practitioner expertise is highly credible for wellness content."
+}
