@@ -28,7 +28,7 @@ class ClientResponse(BaseModel):
     industry: Optional[str]
     service_area: Optional[str]
     onboarding_state: str  # "new", "partial", "fully_onboarded"
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
 
 # ========== ONBOARDING ENDPOINTS ==========

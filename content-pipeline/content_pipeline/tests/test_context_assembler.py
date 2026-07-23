@@ -1,5 +1,5 @@
 # Created: Thursday Jul 23, 2026, 3:07 PM (UTC-6)
-# Last edited: Thursday Jul 23, 2026, 3:07 PM (UTC-6)
+# Last edited: Thursday Jul 23, 2026, 5:07 PM (UTC-6)
 
 """Tests for ClientContextAssembler."""
 
@@ -12,7 +12,7 @@ from content_pipeline.orchestration.context_assembler import ClientContextAssemb
 
 
 @pytest.fixture
-async def context_assembler():
+def context_assembler():
     """Create a ClientContextAssembler instance."""
     client_repo = ClientRepository()
     return ClientContextAssembler(client_repo)
@@ -28,14 +28,15 @@ async def test_client():
         industry="home_services",
         service_area="Denver Metro, CO",
     )
-    return client
+    yield client
+    # Cleanup: delete the test client after the test
+    # (Supabase will handle cascade deletes)
 
 
 class TestContextAssemblerBasics:
     """Basic functionality tests for ClientContextAssembler."""
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database")
     async def test_assemble_new_client_context(self, context_assembler, test_client):
         """Test assembling context for a newly created client."""
         context_md = await context_assembler.assemble(test_client.id)
@@ -52,14 +53,12 @@ class TestContextAssemblerBasics:
         assert "## Notes" in context_md
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database")
     async def test_context_contains_client_name(self, context_assembler, test_client):
         """Test that assembled context contains client name."""
         context_md = await context_assembler.assemble(test_client.id)
         assert "Test HVAC Services" in context_md
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database")
     async def test_context_contains_client_details(self, context_assembler, test_client):
         """Test that assembled context contains client details."""
         context_md = await context_assembler.assemble(test_client.id)
@@ -69,21 +68,18 @@ class TestContextAssemblerBasics:
         assert "test-hvac.example.com" in context_md
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database")
     async def test_context_shows_zero_posts_published(self, context_assembler, test_client):
         """Test that new client shows 0 posts published."""
         context_md = await context_assembler.assemble(test_client.id)
         assert "Posts Published: 0" in context_md
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database")
     async def test_context_shows_no_open_items(self, context_assembler, test_client):
         """Test that new client shows no open items."""
         context_md = await context_assembler.assemble(test_client.id)
         assert "Open Items: None" in context_md
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database")
     async def test_context_timestamp_included(self, context_assembler, test_client):
         """Test that context includes assembly timestamp."""
         context_md = await context_assembler.assemble(test_client.id)
@@ -91,7 +87,6 @@ class TestContextAssemblerBasics:
         assert "UTC" in context_md
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database")
     async def test_context_handles_missing_optional_fields(self, context_assembler, test_client):
         """Test context assembly with minimal client data."""
         # Client created with only required fields
@@ -107,7 +102,6 @@ class TestContextAssemblerComputedFields:
     """Tests for dynamically computed fields."""
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database")
     async def test_last_run_folder_computed_fresh(self, context_assembler, test_client):
         """Test that last run folder is always computed fresh (never stored)."""
         context_md1 = await context_assembler.assemble(test_client.id)
@@ -118,7 +112,6 @@ class TestContextAssemblerComputedFields:
         # Demonstrates that computed fields are always fresh
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database")
     async def test_posts_published_computed_fresh(self, context_assembler, test_client):
         """Test that posts published count is always computed fresh."""
         context_md1 = await context_assembler.assemble(test_client.id)
@@ -127,7 +120,6 @@ class TestContextAssemblerComputedFields:
         # TODO: Publish an article, verify count increases in next assembly
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database")
     async def test_open_items_count_computed_fresh(self, context_assembler, test_client):
         """Test that open items count is always computed fresh."""
         context_md1 = await context_assembler.assemble(test_client.id)

@@ -42,12 +42,12 @@ INSERT INTO authority_models (
   ARRAY['health_claims_without_source', 'compliance_without_code_reference', 'energy_savings_percentages', 'regulatory_requirements'],
   '[
     {"pattern": "Industry standards require...", "replacement": "In our experience, best practice is...", "context": "For standard-based claims", "sort_order": 1},
-    {"pattern": "Research shows...", "replacement": "We'"'"'ve found that...", "context": "For general claims", "sort_order": 2},
+    {"pattern": "Research shows...", "replacement": "We''ve found that...", "context": "For general claims", "sort_order": 2},
     {"pattern": "Studies indicate...", "replacement": "Through years of installations...", "context": "For data-based claims", "sort_order": 3},
     {"pattern": "[EQUIPMENT] reduces costs by [X]%", "replacement": "[EQUIPMENT] typically reduces costs", "context": "Avoid specific percentages without source", "sort_order": 4}
   ]'::jsonb,
   'Based on [X] years of professional installation and service',
-  ARRAY['Drawing on our team'"'"'s 40+ years combined experience', 'From thousands of installations we'"'"'ve completed', 'Based on daily work in the field'],
+  ARRAY['Drawing on our team''s 40+ years combined experience', 'From thousands of installations we''ve completed', 'Based on daily work in the field'],
   'Home services content is highly practical. min_valid_sources_required is zero because field expertise is the primary authority. External sources are nice-to-have but not required. Always reference building codes when applicable.'
 ),
 (
@@ -72,12 +72,12 @@ INSERT INTO authority_models (
   ARRAY['specific_percentages_without_source', 'disease_treatment_claims', 'medical_efficacy_claims', 'pharmaceutical_comparisons'],
   '[
     {"pattern": "Research shows that...", "replacement": "Our therapists observe that...", "context": "For general research claims", "sort_order": 1},
-    {"pattern": "Studies indicate...", "replacement": "In our practice, we'"'"'ve found that...", "context": "For claims based on studies", "sort_order": 2},
+    {"pattern": "Studies indicate...", "replacement": "In our practice, we''ve found that...", "context": "For claims based on studies", "sort_order": 2},
     {"pattern": "[PERCENTAGE]% improvement...", "replacement": "Clients frequently report...", "context": "For specific statistics", "sort_order": 3},
     {"pattern": "According to [WELLNESS_ORG]...", "replacement": "Industry best practices recognize...", "context": "For organizational citations", "sort_order": 4}
   ]'::jsonb,
   'Based on direct work with hundreds of clients',
-  ARRAY['Based on our experience with 500+ clients', 'Drawing on our therapists'" '"'collective expertise', 'From thousands of sessions we'"'"'ve facilitated'],
+  ARRAY['Based on our experience with 500+ clients', 'Drawing on our therapists'' collective expertise', 'From thousands of sessions we''ve facilitated'],
   'Health/wellness content must avoid medical claims that require peer-reviewed sources. When sources fail, repositioning under practitioner expertise is highly credible for wellness content.'
 ),
 (
@@ -101,14 +101,14 @@ INSERT INTO authority_models (
   ARRAY['implementation_patterns', 'performance_considerations', 'code_organization', 'debugging_approaches', 'best_practices', 'technology_comparisons'],
   ARRAY['security_vulnerabilities_without_proof', 'specific_performance_metrics', 'compliance_certifications', 'licensing_requirements'],
   '[
-    {"pattern": "Research shows...", "replacement": "We'"'"'ve found in practice...", "context": "For technical research", "sort_order": 1},
+    {"pattern": "Research shows...", "replacement": "We''ve found in practice...", "context": "For technical research", "sort_order": 1},
     {"pattern": "Studies indicate...", "replacement": "Experience shows...", "context": "For technical data", "sort_order": 2},
     {"pattern": "[FRAMEWORK] reduces development time by [X]%", "replacement": "[FRAMEWORK] typically accelerates development", "context": "For performance claims", "sort_order": 3},
     {"pattern": "According to [ORG]...", "replacement": "In the developer community...", "context": "For organizational citations", "sort_order": 4}
   ]'::jsonb,
   'Based on [X] years of software development experience',
-  ARRAY['Drawing on our team'"'"'s combined 100+ years of coding', 'From thousands of lines of code we'"'"'ve written', 'Based on production systems we'"'"'ve built and maintained'],
-  'Software/tech content thrives on developer expertise and open source community perspective. Official documentation is the gold standard source. Security claims require proof—don'"'"'t claim vulnerabilities without CVE or proof-of-concept.'
+  ARRAY['Drawing on our team''s combined 100+ years of coding', 'From thousands of lines of code we''ve written', 'Based on production systems we''ve built and maintained'],
+  'Software/tech content thrives on developer expertise and open source community perspective. Official documentation is the gold standard source. Security claims require proof—don''t claim vulnerabilities without CVE or proof-of-concept.'
 ),
 (
   'financial_advisory',
@@ -137,7 +137,7 @@ INSERT INTO authority_models (
     {"pattern": "You should...", "replacement": "Many clients find it helpful to...", "context": "Avoid direct recommendations", "sort_order": 4}
   ]'::jsonb,
   'Based on [X] years of financial advisory experience',
-  ARRAY['In our practice advising hundreds of clients', 'Drawing on our team'"'"'s combined experience', 'Based on conversations with clients in this situation'],
+  ARRAY['In our practice advising hundreds of clients', 'Drawing on our team''s combined experience', 'Based on conversations with clients in this situation'],
   'Financial advice carries significant legal/liability concerns. Fallback mode is restricted to general concepts only. Specific investment advice, returns projections, and regulatory interpretation MUST have sources. Consider requiring 3-4 sources for investment-focused content.'
 ),
 (
@@ -167,6 +167,6 @@ INSERT INTO authority_models (
     {"pattern": "This guarantees...", "replacement": "This typically results in...", "context": "Avoid absolute guarantees", "sort_order": 4}
   ]'::jsonb,
   'Based on [X] years of legal practice',
-  ARRAY['Drawing on our firm'"'"'s 25 years of experience', 'From our perspective as practicing attorneys', 'Based on patterns we'"'"'ve observed in practice'],
+  ARRAY['Drawing on our firm''s 25 years of experience', 'From our perspective as practicing attorneys', 'Based on patterns we''ve observed in practice'],
   'Legal content carries significant liability. Fallback mode is restricted—only general legal process can be explained under attorney authority. Specific legal advice requires sources. Consider requiring 5 sources for high-liability practice areas.'
 );

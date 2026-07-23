@@ -1,0 +1,111 @@
+================================================================================
+MANUAL SUPABASE DEPLOYMENT STEPS
+================================================================================
+Created: Thursday Jul 23, 2026, 4:32 PM (UTC-6)
+Last edited: Thursday Jul 23, 2026, 4:32 PM (UTC-6)
+
+STEP 1: GRANT SERVICE ROLE PERMISSIONS
+================================================================================
+
+1. Open Supabase Dashboard
+   URL: https://app.supabase.com/project/yiuosyhmowkqziwmssxo/sql/new
+
+2. Copy all text from: grant_permissions.sql
+
+3. Paste into SQL Editor
+
+4. Click "Run"
+
+5. Verify: "Executed successfully" appears
+
+6. Check: Permissions granted
+   Execute: SELECT role_name, table_name, privilege_type FROM information_schema.role_table_grants WHERE role_name = 'service_role' ORDER BY table_name;
+
+
+STEP 2: DEPLOY SEED DATA
+================================================================================
+
+1. Open Supabase Dashboard
+   URL: https://app.supabase.com/project/yiuosyhmowkqziwmssxo/sql/new
+
+2. Copy all text from: 
+   content-pipeline/supabase/seed_data.sql
+
+3. Paste into SQL Editor
+
+4. Click "Run"
+
+5. Verify: "Executed successfully" appears
+
+6. Check: Data inserted
+   Execute: SELECT COUNT(*) FROM authority_models;
+   Execute: SELECT COUNT(*) FROM css_templates;
+   Execute: SELECT COUNT(*) FROM provider_settings;
+
+   Expected counts:
+   - authority_models: 5
+   - css_templates: 2
+   - provider_settings: 3
+
+
+STEP 3: RUN TEST SUITE
+================================================================================
+
+1. Open Terminal / Command Prompt
+
+2. Navigate to project:
+   cd c:\Users\Lknepp\Desktop\Staging\CC-Python-version\content-pipeline
+
+3. Run tests:
+   python -m pytest content_pipeline/tests/ -v
+
+4. Compare results:
+   - Before: 31 SKIPPED, 46 ERRORS, 0 PASSED
+   - After (expected): Most errors resolved, higher PASSED count
+
+5. Review any remaining failures
+
+
+VERIFICATION CHECKLIST
+================================================================================
+
+After completing all steps, verify:
+
+[ ] Service role permissions granted (Step 1)
+[ ] Seed data tables populated (Step 2)
+[ ] Pytest suite executed successfully (Step 3)
+[ ] authority_models: 5 records
+[ ] css_templates: 2 records
+[ ] provider_settings: 3 records
+[ ] All critical tests passing
+
+ERROR RECOVERY
+================================================================================
+
+If "permission denied" errors persist:
+  1. Verify you're logged into Supabase as admin/owner
+  2. Re-execute STEP 1 (grant permissions)
+  3. Wait 10 seconds, then re-run tests
+
+If seed data shows 0 records:
+  1. Check SQL Editor output for errors
+  2. Verify seed_data.sql copied completely
+  3. Re-execute STEP 2
+
+If pytest hangs:
+  1. Press Ctrl+C to stop
+  2. Re-run with timeout: pytest content_pipeline/tests/ -v --timeout=60
+
+SUPPORT
+================================================================================
+
+Project: Content Pipeline v2.1
+Repository: c:\Users\Lknepp\Desktop\Staging\CC-Python-version
+Documentation: See DEPLOYMENT_TEST_REPORT.md for detailed analysis
+
+For issues:
+- Check Supabase logs: https://app.supabase.com/project/yiuosyhmowkqziwmssxo/logs
+- Review pytest output for specific failure messages
+- Contact: (your team)
+
+================================================================================

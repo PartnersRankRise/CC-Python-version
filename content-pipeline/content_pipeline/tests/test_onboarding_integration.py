@@ -1,5 +1,5 @@
 # Created: Thursday Jul 23, 2026, 2:54 PM (UTC-6)
-# Last edited: Thursday Jul 23, 2026, 2:54 PM (UTC-6)
+# Last edited: Thursday Jul 23, 2026, 5:07 PM (UTC-6)
 
 """Integration tests for full onboarding workflow."""
 
@@ -15,7 +15,7 @@ from content_pipeline.domain.enums import ClientState
 
 
 @pytest.fixture
-async def setup_services():
+def setup_services():
     """Setup all services needed for onboarding workflow."""
     client_repo = ClientRepository()
     llm = LLMProviderFactory.create_smart_provider()
@@ -40,10 +40,9 @@ class TestOnboardingHappyPath:
     """Happy path: new client → onboarding → complete."""
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database and LLM API access")
     async def test_full_onboarding_workflow(self, setup_services):
         """Test complete onboarding: create client → generate reference files."""
-        services = await setup_services
+        services = setup_services
         client_repo = services["client_repo"]
         onboarding_stage = services["onboarding_stage"]
 
@@ -96,10 +95,9 @@ class TestOnboardingStateTransitions:
     """Test state transitions during onboarding."""
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database")
     async def test_new_to_partial_to_fully_onboarded(self, setup_services):
         """Test client progression through states."""
-        services = await setup_services
+        services = setup_services
         client_repo = services["client_repo"]
 
         # Create new client (NEW state)
@@ -147,10 +145,9 @@ class TestClientAlreadyOnboardedError:
     """Test error handling for already-onboarded clients."""
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database and LLM API")
     async def test_already_onboarded_without_regenerate(self, setup_services):
         """Test that already-onboarded clients block re-onboarding without regenerate flag."""
-        services = await setup_services
+        services = setup_services
         client_repo = services["client_repo"]
         onboarding_stage = services["onboarding_stage"]
 
@@ -186,10 +183,9 @@ class TestBrandColorExtraction:
     """Test brand color extraction during onboarding."""
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database and LLM API")
     async def test_brand_colors_extracted_and_stored(self, setup_services):
         """Test that brand colors are extracted and stored correctly."""
-        services = await setup_services
+        services = setup_services
         client_repo = services["client_repo"]
         onboarding_stage = services["onboarding_stage"]
 
@@ -218,10 +214,9 @@ class TestOnboardingErrorRecovery:
     """Test error handling and recovery during onboarding."""
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires LLM API")
     async def test_invalid_content_samples(self, setup_services):
         """Test handling of invalid content samples."""
-        services = await setup_services
+        services = setup_services
         onboarding_stage = services["onboarding_stage"]
 
         with pytest.raises(ValueError):
@@ -233,10 +228,9 @@ class TestOnboardingErrorRecovery:
             )
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database")
     async def test_nonexistent_client(self, setup_services):
         """Test handling of nonexistent client."""
-        services = await setup_services
+        services = setup_services
         client_repo = services["client_repo"]
 
         from content_pipeline.exceptions import ClientNotFoundError
@@ -249,10 +243,9 @@ class TestOnboardingMetadata:
     """Test metadata extraction and storage."""
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database and LLM API")
     async def test_reading_level_extracted(self, setup_services):
         """Test that reading level is extracted during onboarding."""
-        services = await setup_services
+        services = setup_services
         client_repo = services["client_repo"]
         onboarding_stage = services["onboarding_stage"]
 
@@ -279,10 +272,9 @@ class TestOnboardingWithContextOverrides:
     """Test onboarding with additional context."""
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database and LLM API")
     async def test_service_area_override(self, setup_services):
         """Test service area override during onboarding."""
-        services = await setup_services
+        services = setup_services
         client_repo = services["client_repo"]
         onboarding_stage = services["onboarding_stage"]
 
@@ -306,10 +298,9 @@ class TestOnboardingWithContextOverrides:
         assert override_area in result.brand_notes or override_area in result.audience_profile
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires Supabase database and LLM API")
     async def test_off_limits_topics_stored(self, setup_services):
         """Test off-limits topics are recorded."""
-        services = await setup_services
+        services = setup_services
         client_repo = services["client_repo"]
         onboarding_stage = services["onboarding_stage"]
 
@@ -337,10 +328,9 @@ class TestOnboardingPerformance:
     """Test performance and resource usage."""
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Requires performance test environment")
     async def test_onboarding_completes_in_reasonable_time(self, setup_services):
         """Test that onboarding completes within acceptable time."""
-        services = await setup_services
+        services = setup_services
         client_repo = services["client_repo"]
         onboarding_stage = services["onboarding_stage"]
 

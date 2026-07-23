@@ -380,7 +380,7 @@ CREATE TABLE jobs (
   job_id            UUID NOT NULL UNIQUE,           -- Job ID from ARQ
   status            TEXT NOT NULL DEFAULT 'queued'  -- "queued", "running", "complete", "failed"
     CHECK (status IN ('queued', 'running', 'complete', 'failed')),
-  job_type          TEXT NOT NULL DEFAULT 'onboarding'  -- "onboarding", "stage_execution", etc.
+  job_type          TEXT NOT NULL DEFAULT 'onboarding',  -- "onboarding", "stage_execution", etc.
   progress          TEXT,                           -- "Step X/7", "Running validation", etc.
   result            JSONB,                          -- Result data when complete
   error_message     TEXT,                           -- Error when failed
